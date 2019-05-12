@@ -1,0 +1,35 @@
+version: '3.1'
+services:
+  db:
+    image: mariadb/server:10.3
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+  php:
+    build: ./fpm-template
+    restart: always
+    links:
+      - db:db
+    volumes:
+      - .:/var/www/html
+    environment:
+      SS_ENVIRONMENT_TYPE: dev
+      SS_DATABASE_SERVER: db
+      SS_DATABASE_NAME: SS_mysite
+      SS_DATABASE_USERNAME: root
+      SS_DATABASE_PASSWORD: password
+      SS_DEFAULT_ADMIN_USERNAME: admin
+      SS_DEFAULT_ADMIN_PASSWORD: password
+  nginx:
+    build: ./nginx-fpm-template
+    restart: always
+    ports:
+      - 8200:80
+    links:
+      - php:php
+    volumes:
+      - .:/var/www/html
+volumes:
+  db_data: {}
